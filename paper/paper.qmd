@@ -1,0 +1,73 @@
+---
+title: ""
+author: ""
+thanks: "Code and data are available at: [GitHub repo Link]"
+date: today
+date-format: long
+format: pdf
+bibliography: references.bib
+---
+
+```{r}
+#| include: false
+#| warning: false
+#| message: false
+library(here)
+library(tidyverse)
+options(scipen=999)
+```
+
+```{r}
+#| include: false
+#| warning: false
+#| message: false
+radiohead  <- readRDS(here("spotify_api/data/00-raw_data/radiohead.rds"))
+radiohead
+```
+
+```{r}
+#| warning: false
+#| message: false
+#| echo:    false
+radiohead <- as_tibble(radiohead)
+
+radiohead |>
+  mutate(album_release_date = ymd(album_release_date)) |>
+  ggplot(aes(
+    x = album_release_date,
+    y = duration_ms,
+    group = album_release_date
+  )) +
+  geom_boxplot() +
+  geom_jitter(alpha = 0.5, width = 0.3, height = 0) +
+  theme_minimal() +
+  labs(
+    x = "Album release date",
+    y = "Duration of song (ms)"
+  )
+```
+
+```{r}
+#| warning: false
+#| message: false
+#| echo:    false
+rbind( the_national, radiohead) |>
+  select(artist_name, album_release_date, valence) |>
+  mutate(album_release_date = ymd(album_release_date)) |> 
+  ggplot(aes( x = album_release_date, y = valence, color = artist_name)) +
+  geom_point(alpha = 0.3) +
+  geom_smooth() +
+  theme_minimal() +
+  facet_wrap(facets = vars(artist_name), dir = "v") +
+  labs(
+    x = "Album release date",
+    y = "Valence",
+    color = "Artist"
+  ) +
+  scale_color_brewer(palette = "Set1") +
+  theme(legend.position = "bottom")
+```
+
+
+
+

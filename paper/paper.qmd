@@ -21,17 +21,15 @@ options(scipen=999)
 #| include: false
 #| warning: false
 #| message: false
-radiohead  <- readRDS(here("spotify_api/data/00-raw_data/radiohead.rds"))
-radiohead
+the_chainsmokers <- readRDS(here("data/00-raw_data/the_chainsmokers.rds"))
+the_chainsmokers
 ```
 
 ```{r}
 #| warning: false
 #| message: false
 #| echo:    false
-radiohead <- as_tibble(radiohead)
-
-radiohead |>
+the_chainsmokers |>
   mutate(album_release_date = ymd(album_release_date)) |>
   ggplot(aes(
     x = album_release_date,
@@ -51,21 +49,28 @@ radiohead |>
 #| warning: false
 #| message: false
 #| echo:    false
-rbind( the_national, radiohead) |>
-  select(artist_name, album_release_date, valence) |>
-  mutate(album_release_date = ymd(album_release_date)) |> 
-  ggplot(aes( x = album_release_date, y = valence, color = artist_name)) +
-  geom_point(alpha = 0.3) +
-  geom_smooth() +
-  theme_minimal() +
-  facet_wrap(facets = vars(artist_name), dir = "v") +
-  labs(
-    x = "Album release date",
-    y = "Valence",
-    color = "Artist"
-  ) +
-  scale_color_brewer(palette = "Set1") +
-  theme(legend.position = "bottom")
+#| fig-align: "center"
+#| fig-width: 10
+#| fig-height: 6
+audio_features <- c('danceability', 'energy', 'speechiness', 'acousticness', 
+                    'instrumentalness', 'liveness', 'valence')
+the_chainsmokers_filtered <- the_chainsmokers %>%
+  filter(album_name != "So Far So Good (lofi remixes)")
+
+album_comparison <- the_chainsmokers_filtered %>%
+  group_by(album_name) %>%
+  summarise(across(all_of(audio_features), mean, na.rm = TRUE))
+
+album_comparison_long <- tidyr::pivot_longer(album_comparison, 
+                                             cols = audio_features, 
+                                             names_to = "feature", 
+                                             values_to = "mean_value")
+ggplot(album_comparison_long, aes(x = album_name, y = mean_value, fill = feature)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(x = "Album Name", y = "Mean Value", 
+       title = "Comparison of Audio Features by Album (Excluding Loudness and Tempo)") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1, size = 8, margin = margin(t = 10))) + 
+  theme_minimal()
 ```
 
 

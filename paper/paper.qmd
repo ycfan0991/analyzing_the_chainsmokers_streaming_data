@@ -29,7 +29,14 @@ library(readr)
 library(magrittr)
 library(lubridate)
 library(spotifyr)
+library(kableExtra)
+
+# Load the raw data
+raw_data <- readRDS(here::here("data", "raw_data", "chainsmokers.rds"))
+clean_data <- readRDS(here::here("data", "analysis_data", "clean_chainsmokers_data.rds"))
 ```
+
+\newpage
 
 # Introduction
 
@@ -133,7 +140,7 @@ energy_plot
 ```
 @fig-energy illustrates the consistency in energy across The Chainsmokers' discography, reinforcing their reputation for creating music with high intensity and dynamic beats.
 
-Valence measures the emotional positivity of a track. A higher valence score indicates a more positive, cheerful sound, while lower scores suggest a more somber or melancholic tone. As shown in @fig-valence, there is a slight downward trend in valence in The Chainsmokers' music, particularly in their more recent albums like Sick Boy and World War Joy. This shift may reflect a growing maturity in their themes, moving from upbeat, pop-infused tracks to more emotionally complex compositions.
+Valence measures the emotional positivity of a track. A higher valence score suggests a more cheerful, upbeat tone, while lower scores indicate a more somber or melancholic mood. As shown in @fig-valence, there is a slight upward trend in valence in The Chainsmokers' music, especially in more recent albums like *So Far So Good* and *Summertime Friends*. This gradual increase may reflect a subtle shift toward more positive or varied emotional tones in their music, signaling an evolution in their thematic and production choices.
 
 ```{r}
 #| echo: false
@@ -147,7 +154,7 @@ Valence measures the emotional positivity of a track. A higher valence score ind
 
 valence_plot
 ```
-@fig-valence highlights how The Chainsmokers' emotional tone has shifted slightly over time, suggesting a nuanced evolution in their thematic choices.
+@fig-valence illustrates how The Chainsmokers’ emotional tone has evolved slightly, showcasing a more positive shift over time across their discography.
 
 The Chainsmokers' music is typically characterized by its suitability for dancing, with danceability being a key feature in their tracks. As shown in @fig-dance_acoustic, their tracks maintain high danceability scores, with values above 0.6 across most albums. This reflects their commitment to creating music that is rhythmically engaging and suited for dance floors.
 
@@ -189,43 +196,49 @@ Finally, **collaborations with featured artists** could be explored in more dept
 
 In future work, expanding the dataset to include these additional dimensions—lyrics, live performances, tempo, loudness, and collaborations—could yield a more nuanced understanding of The Chainsmokers' music. This would provide a richer context for their evolution as artists and offer new perspectives on how they continue to navigate and influence the ever-changing music industry.
 
+\newpage
+
 \appendix
 
 # Appendix {#sec-app}
+
+## Raw Data Processing
+The raw data for this analysis was sourced from the Spotify API using the spotifyr [@citeSpotifyr] package. The initial data includes audio features for The Chainsmokers' tracks, such as danceability, energy, acousticness, valence, speechiness, and tempo. The cleaning process focused on ensuring temporal accuracy by filtering and formatting the album release dates.
 
 ```{r}
 #| echo: false
 #| eval: true
 #| label: tbl-raw
-#| tbl-cap: "Raw Chainsmokers Spotify Data"
-#| warning: false
-#| message: false
+#| tbl-cap: "Raw The Chainsmokers Spotify Data"
 
-# Select and round key columns from the raw data
-selected_raw_data <- raw_data[, c("album_id", "danceability", "energy", "acousticness", "valence", "speechiness")]
-selected_raw_data[, 2:6] <- round(selected_raw_data[, 2:6], 2)
+selected_raw_data <- raw_data[, c("album_name", "album_release_date", "danceability", "energy", "acousticness", "valence")]
+selected_raw_data[, 3:6] <- round(selected_raw_data[, 3:6], 2)
 
-# Display the first six rows of raw data
 kbl(selected_raw_data[1:6, ]) %>%
   kable_styling(full_width = F, bootstrap_options = c("striped", "hover", "condensed"))
+
 ```
+## Cleaned Data
+To clean the data, tracks missing release dates were removed, and the `album_release_date` was formatted into a consistent year-month-day format using `lubridate::ymd()`. Tracks with missing or invalid audio features were also excluded to maintain data integrity. The cleaned data was saved for further analysis.
 
 ```{r}
 #| echo: false
 #| eval: true
 #| label: tbl-clean
-#| tbl-cap: "Processed Chainsmokers Spotify Data"
-#| warning: false
-#| message: false
+#| tbl-cap: "Processed The Chainsmokers Spotify Data"
 
-# Select and round key columns from the cleaned data
-selected_clean_data <- clean_data[, c("album_id", "danceability", "energy", "acousticness", "valence", "speechiness")]
-selected_clean_data[, 2:6] <- round(selected_clean_data[, 2:6], 2)
+selected_clean_data <- clean_data[, c("album_name", "album_release_date", "danceability", "energy", "acousticness", "valence")]
+selected_clean_data[, 3:6] <- round(selected_clean_data[, 3:6], 2)
 
-# Display the first six rows of cleaned data
 kbl(selected_clean_data[1:6, ]) %>%
   kable_styling(full_width = F, bootstrap_options = c("striped", "hover", "condensed"))
-```
-Data cleaning involved selecting the relevant audio features—danceability, energy, acousticness, valence, and speechiness—from the Spotify API data. Inconsistent album release dates were corrected using lubridate::ymd(), and rows with missing or invalid values were removed.
 
-The cleaned dataset (@tbl-clean) ensures consistency and completeness, as seen by comparing it to the raw data (@tbl-raw).
+```
+## Data Processing Overview
+The cleaning process began by loading the raw data from a `.rds` file. To ensure that all tracks included in the analysis were associated with valid albums, any tracks with missing release dates were excluded. The date formatting was standardized using `lubridate::ymd()`, ensuring consistency across all entries. Additionally, audio features critical to the analysis, such as danceability, energy, acousticness, and valence, were retained while others were excluded for relevance. Finally, the cleaned data was saved in the `analysis_data` folder.
+
+The difference between the raw and cleaned datasets can be observed by comparing @tbl-raw and @tbl-clean. The final dataset contains only complete and reliable records, ensuring that subsequent analyses are based on valid data.
+
+\newpage
+
+# References {#sec-references}

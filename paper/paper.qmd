@@ -124,7 +124,7 @@ This section presents the analysis of key audio features from The Chainsmokers' 
 
 ### Energy Across Albums
 
-Energy is a crucial feature of The Chainsmokers' music, reflecting the intensity and dynamic nature of their tracks. As shown in @fig-energy, The Chainsmokers have consistently maintained high energy levels across their albums. Tracks from albums such as *Memories...Do Not Open* and *World War Joy* exhibit energy values that typically remain above 0.7, indicating the fast-paced, upbeat nature of their music. This trend is reflective of their electronic dance music (EDM) roots, where high energy is a signature element.
+Energy is a crucial feature of The Chainsmokers' music, reflecting the intensity and dynamic nature of their tracks. As shown in @fig-energy, The Chainsmokers have consistently maintained high energy levels across their albums. Tracks from albums such as *Memories...Do Not Open* and *World War Joy* exhibit energy values that typically remain above 0.5, indicating the fast-paced, upbeat nature of their music. This trend is reflective of their electronic dance music (EDM) roots, where high energy is a signature element.
 
 ```{r}
 #| echo: false
@@ -211,8 +211,8 @@ The raw data for this analysis was sourced from the Spotify API using the spotif
 #| label: tbl-raw
 #| tbl-cap: "Raw The Chainsmokers Spotify Data"
 
-selected_raw_data <- raw_data[, c("album_name", "album_release_date", "danceability", "energy", "acousticness", "valence")]
-selected_raw_data[, 3:6] <- round(selected_raw_data[, 3:6], 2)
+selected_raw_data <- raw_data[, c("album_id", "danceability", "energy", "acousticness", "valence")]
+selected_raw_data[, 2:5] <- round(selected_raw_data[, 2:5], 2)
 
 kbl(selected_raw_data[1:6, ]) %>%
   kable_styling(full_width = F, bootstrap_options = c("striped", "hover", "condensed"))

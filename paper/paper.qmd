@@ -158,7 +158,7 @@ valence_plot
 
 The Chainsmokers' music is typically characterized by its suitability for dancing, with danceability being a key feature in their tracks. As shown in @fig-dance_acoustic, their tracks maintain high danceability scores, with values above 0.6 across most albums. This reflects their commitment to creating music that is rhythmically engaging and suited for dance floors.
 
-On the other hand, acousticness remains low across their discography, indicating a consistent use of electronic production and minimal reliance on acoustic instruments. This reinforces their electronic music identity, as seen in albums like Sick Boy and Memories...Do Not Open, where acousticness scores remain close to 0.
+On the other hand, acousticness remains low across their discography, indicating a consistent use of electronic production and minimal reliance on acoustic instruments. This reinforces their electronic music identity, as seen in albums like *Sick Boy* and *Memories...Do Not Open*, where acousticness scores remain close to 0.
 
 ```{r}
 #| echo: false

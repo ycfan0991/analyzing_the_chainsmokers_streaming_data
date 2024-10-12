@@ -1,10 +1,18 @@
 ---
-title: ""
-author: ""
-thanks: "Code and data are available at: [GitHub repo Link]"
-date: today
+title: "The Chainsmokers’ Musical Evolution"
+subtitle: "From Pop-Infused EDM to a Consistent Electronic Core"
+author: 
+  - name: Jerry Xia
+  - name: Peter Fan
+  - name: Jason Yang
+thanks: "Code and data are available at: <https://github.com/ycfan0991/analyzing_the_chainsmokers_streaming_data>"
+date: "October 10, 2024"
 date-format: long
+abstract: "This paper analyzes the evolution of The Chainsmokers’ music by examining key audio features such as acousticness, energy, valence, and danceability using data from the Spotify API. The study focuses on the band's most popular albums, showcasing their transition through various pop-influenced styles while retaining a consistent electronic production core. By analyzing these attributes across their discography, this study provides insights into how The Chainsmokers adapted their music while maintaining high energy and rhythmic accessibility."
 format: pdf
+toc: true
+toc-depth: 3
+number-sections: true
 bibliography: references.bib
 ---
 
@@ -12,67 +20,212 @@ bibliography: references.bib
 #| include: false
 #| warning: false
 #| message: false
+
+# Load required libraries
+library(dplyr)
+library(ggplot2)
 library(here)
-library(tidyverse)
-options(scipen=999)
+library(readr)
+library(magrittr)
+library(lubridate)
+library(spotifyr)
 ```
+
+# Introduction
+
+The Chainsmokers are a globally recognized DJ duo known for their electronic dance music (EDM) blended with pop influences. Since their breakout in 2014 with "Selfie," they have consistently released chart-topping singles and albums that blend infectious beats with mainstream pop appeal. This fusion has allowed them to carve out a unique space in the music industry, where they collaborate with various vocalists to create a signature sound that resonates across diverse audiences.
+
+This paper seeks to explore the evolution of The Chainsmokers' sound by analyzing key audio features such as **acousticness**, **energy**, **valence**, **danceability**, and **speechiness** using data sourced from the Spotify API. By examining these attributes across their most popular albums, this study aims to uncover trends in their musical style and provide insights into how they have adapted to changes in the music landscape while maintaining core elements of their production.
+
+Focusing on albums such as *Memories...Do Not Open*, *Sick Boy*, and *World War Joy*, this paper will analyze how The Chainsmokers have balanced pop trends with their electronic roots. The analysis will highlight their consistent use of high-energy tracks and their exploration of emotional tone (valence) and danceability. 
+
+This paper is structured as follows: @sec-data presents the data sources, methodologies, and visualization of the results. The findings are then discussed in @sec-dis, and additional detailed information is provided in the appendix at @sec-app.
+
+# Data {#sec-data}
+
+This project is guided by Rohan Alexander's work and his book on data analysis [@citeTbook]. The data used in this paper were downloaded, cleaned, and analyzed using the programming language `R` [@citeR] and the following R packages: `dplyr` [@citeDplyr], `usethis` [@citeUsethis], `magrittr` [@citeMagrittr], `spotifyr` [@citeSpotifyr], `tidyverse` [@citeTidyverse], `lubridate` [@citeLubridate], `here` [@citeHere], and `readr` [@citeReadr].
+
+## Source
+
+Data for this paper was obtained from the Spotify API [@citeSpotify]. The Spotify API provides comprehensive track-level data, including details about acoustic features, popularity metrics, and track metadata for artists. Using the `spotifyr` package [@citeSpotifyr], we were able to query The Chainsmokers' discography and retrieve key information such as track-level audio features and album release dates.
+
+The dataset includes all albums released by The Chainsmokers, such as *Memories...Do Not Open*, *Sick Boy*, and *World War Joy*. Each track in the dataset is associated with its album release date, enabling a temporal analysis of their musical evolution.
+
+## Measurement
+
+Spotify provides several audio features that are key to understanding the musical characteristics of tracks. These features, while not exhaustively described by Spotify, are commonly interpreted as follows:
+
+- **Acousticness**: A measure of the likelihood of a track being acoustic. Higher values indicate that the track is more acoustic and uses non-electronic instruments.
+- **Energy**: A measure of intensity and activity, capturing the dynamic and energetic feel of a track. High energy typically represents fast-paced, intense music.
+- **Valence**: A measure of musical positiveness. Tracks with higher valence are considered more positive and cheerful, while lower valence suggests a more somber or melancholic tone.
+- **Danceability**: A measure of how suitable a track is for dancing, based on its rhythm stability, tempo, and beat strength.
+- **Speechiness**: Speechiness quantifies the presence of spoken words in a track. Higher values indicate a greater presence of speech, as found in rap or spoken word tracks.
+
+Further details about the data processing and cleaning steps can be found in the appendix at @sec-app.
 
 ```{r}
 #| include: false
 #| warning: false
 #| message: false
-the_chainsmokers <- readRDS(here("data/00-raw_data/the_chainsmokers.rds"))
-the_chainsmokers
-```
 
-```{r}
-#| warning: false
-#| message: false
-#| echo:    false
-the_chainsmokers |>
-  mutate(album_release_date = ymd(album_release_date)) |>
-  ggplot(aes(
-    x = album_release_date,
-    y = duration_ms,
-    group = album_release_date
-  )) +
-  geom_boxplot() +
-  geom_jitter(alpha = 0.5, width = 0.3, height = 0) +
+# Load the cleaned data
+clean_data <- readRDS(here::here("data", "analysis_data", "clean_chainsmokers_data.rds"))
+
+# Generate the energy plot
+energy_plot <- clean_data %>%
+  ggplot(aes(x = album_release_date, y = energy, color = album_name)) +
+  geom_line(stat = "summary", fun = "mean", size = 1.2) +
+  geom_point(alpha = 0.5) +
   theme_minimal() +
   labs(
-    x = "Album release date",
-    y = "Duration of song (ms)"
-  )
+    x = "Album Release Date",
+    y = "Energy",
+    color = "Album"
+  ) +
+  theme(legend.position = "bottom")
+
+# Generate the valence plot
+valence_plot <- clean_data %>%
+  ggplot(aes(x = album_release_date, y = valence, color = album_name)) +
+  geom_line(stat = "summary", fun = "mean", size = 1.2) +
+  geom_point(alpha = 0.5) +
+  theme_minimal() +
+  labs(
+    x = "Album Release Date",
+    y = "Valence",
+    color = "Album"
+  ) +
+  theme(legend.position = "bottom")
+
+# Generate the danceability and acousticness comparison plot
+dance_acoustic_plot <- clean_data %>%
+  ggplot(aes(x = album_release_date)) +
+  geom_line(aes(y = danceability, color = "Danceability"), stat = "summary", fun = "mean", size = 1.2) +
+  geom_line(aes(y = acousticness, color = "Acousticness"), stat = "summary", fun = "mean", size = 1.2) +
+  theme_minimal() +
+  labs(
+    x = "Album Release Date",
+    y = "Score",
+    color = "Feature"
+  ) +
+  theme(legend.position = "bottom")
+```
+
+## Results
+
+This section presents the analysis of key audio features from The Chainsmokers' albums, focusing on **energy**, **valence**, **danceability**, and **acousticness**. The data visualizations illustrate how these features have evolved over time and provide insight into the musical trends that define The Chainsmokers' sound.
+
+### Energy Across Albums
+
+Energy is a crucial feature of The Chainsmokers' music, reflecting the intensity and dynamic nature of their tracks. As shown in @fig-energy, The Chainsmokers have consistently maintained high energy levels across their albums. Tracks from albums such as *Memories...Do Not Open* and *World War Joy* exhibit energy values that typically remain above 0.7, indicating the fast-paced, upbeat nature of their music. This trend is reflective of their electronic dance music (EDM) roots, where high energy is a signature element.
+
+```{r}
+#| echo: false
+#| eval: true
+#| label: fig-energy
+#| fig-cap: "Energy Levels of The Chainsmokers' Tracks Over Time (2014-2023)"
+#| warning: false
+#| message: false
+#| fig-height: 6
+#| fig-width: 7
+
+energy_plot
+```
+@fig-energy illustrates the consistency in energy across The Chainsmokers' discography, reinforcing their reputation for creating music with high intensity and dynamic beats.
+
+Valence measures the emotional positivity of a track. A higher valence score indicates a more positive, cheerful sound, while lower scores suggest a more somber or melancholic tone. As shown in @fig-valence, there is a slight downward trend in valence in The Chainsmokers' music, particularly in their more recent albums like Sick Boy and World War Joy. This shift may reflect a growing maturity in their themes, moving from upbeat, pop-infused tracks to more emotionally complex compositions.
+
+```{r}
+#| echo: false
+#| eval: true
+#| label: fig-valence
+#| fig-cap: "Valence of The Chainsmokers' Tracks Across Albums"
+#| warning: false
+#| message: false
+#| fig-height: 6
+#| fig-width: 7
+
+valence_plot
+```
+@fig-valence highlights how The Chainsmokers' emotional tone has shifted slightly over time, suggesting a nuanced evolution in their thematic choices.
+
+The Chainsmokers' music is typically characterized by its suitability for dancing, with danceability being a key feature in their tracks. As shown in @fig-dance_acoustic, their tracks maintain high danceability scores, with values above 0.6 across most albums. This reflects their commitment to creating music that is rhythmically engaging and suited for dance floors.
+
+On the other hand, acousticness remains low across their discography, indicating a consistent use of electronic production and minimal reliance on acoustic instruments. This reinforces their electronic music identity, as seen in albums like Sick Boy and Memories...Do Not Open, where acousticness scores remain close to 0.
+
+```{r}
+#| echo: false
+#| eval: true
+#| label: fig-dance_acoustic
+#| fig-cap: "Danceability and Acousticness of The Chainsmokers' Tracks Over Time"
+#| warning: false
+#| message: false
+#| fig-height: 6
+#| fig-width: 7
+
+dance_acoustic_plot
+```
+@fig-dance_acoustic shows that while The Chainsmokers' music is highly danceable, their reliance on electronic elements remains central, with low acousticness scores across their albums.
+
+# Discussion {#sec-dis}
+
+The analysis of The Chainsmokers' discography reveals several key trends in their musical evolution. Consistent with their identity as electronic dance music (EDM) producers, The Chainsmokers maintain high **energy** levels across their tracks. As seen in @fig-energy, the energetic intensity of their music is a defining characteristic, particularly in albums like *Memories...Do Not Open* and *World War Joy*. This sustained high energy supports their reputation for creating tracks suited for both mainstream pop audiences and electronic music festivals.
+
+In contrast, the **valence** analysis shows a slight downward trend in recent albums, such as *Sick Boy* and *World War Joy*, suggesting a shift toward more complex and potentially melancholic emotional tones (@fig-valence). This evolution might reflect broader trends in popular music, where artists often shift from bright, upbeat themes to more introspective and emotionally nuanced topics over time. The Chainsmokers have managed to balance this shift in tone while still maintaining their electronic roots.
+
+The comparison of **danceability** and **acousticness** further emphasizes their electronic foundation. As demonstrated in @fig-dance_acoustic, The Chainsmokers consistently produce tracks with high danceability, ensuring their music remains accessible to club and festival settings. At the same time, **acousticness** remains low, indicating their continued reliance on electronic instruments and production techniques rather than incorporating acoustic elements. This distinction between danceability and acousticness highlights their ability to stay true to their EDM origins while adapting to trends in popular music.
+
+Overall, these findings suggest that while The Chainsmokers have experimented with emotional tone (valence), they have largely preserved the key elements of their signature sound—high energy, danceable beats, and minimal acoustic production. These elements have helped them remain relevant in a constantly evolving music industry.
+
+## Weaknesses and Next Steps
+
+While this analysis provides valuable insights into The Chainsmokers' musical evolution, there are several limitations that could be addressed in future studies. One notable weakness is the reliance on a relatively small set of audio features (energy, valence, danceability, acousticness, and speechiness). Although these features offer a useful framework for understanding their music, they do not fully capture other important aspects such as **lyrical content**, **instrumentation intricacies**, and **production techniques**. Future research could expand the analysis by incorporating sentiment analysis or lyrical theme extraction to assess how their thematic content has evolved alongside their sound.
+
+Another limitation is the focus on **studio-recorded tracks**. While these tracks represent the core of The Chainsmokers' discography, they do not account for **live performances** or **remixes**, which often play a crucial role in electronic dance music culture. Including data from live recordings or remix albums could provide a more holistic understanding of their artistic expression and how their tracks are adapted for different contexts.
+
+An interesting observation in the data is the **consistency in tempo** across their albums, which was not a primary focus of this study. Analyzing tempo could offer additional insights into their pacing and how they maintain listener engagement. Similarly, **loudness** could be another feature worth investigating, especially in relation to how their tracks are mastered for different platforms (e.g., streaming services vs. live performances). These additional features could help to paint a more complete picture of their production choices.
+
+Finally, **collaborations with featured artists** could be explored in more depth. The Chainsmokers frequently collaborate with other artists, which can significantly influence the sound and direction of individual tracks. An analysis of how **collaborations** impact key features like **valence** or **energy** could reveal whether these partnerships have contributed to the emotional shifts observed in their more recent works.
+
+In future work, expanding the dataset to include these additional dimensions—lyrics, live performances, tempo, loudness, and collaborations—could yield a more nuanced understanding of The Chainsmokers' music. This would provide a richer context for their evolution as artists and offer new perspectives on how they continue to navigate and influence the ever-changing music industry.
+
+\appendix
+
+# Appendix {#sec-app}
+
+```{r}
+#| echo: false
+#| eval: true
+#| label: tbl-raw
+#| tbl-cap: "Raw Chainsmokers Spotify Data"
+#| warning: false
+#| message: false
+
+# Select and round key columns from the raw data
+selected_raw_data <- raw_data[, c("album_id", "danceability", "energy", "acousticness", "valence", "speechiness")]
+selected_raw_data[, 2:6] <- round(selected_raw_data[, 2:6], 2)
+
+# Display the first six rows of raw data
+kbl(selected_raw_data[1:6, ]) %>%
+  kable_styling(full_width = F, bootstrap_options = c("striped", "hover", "condensed"))
 ```
 
 ```{r}
+#| echo: false
+#| eval: true
+#| label: tbl-clean
+#| tbl-cap: "Processed Chainsmokers Spotify Data"
 #| warning: false
 #| message: false
-#| echo:    false
-#| fig-align: "center"
-#| fig-width: 10
-#| fig-height: 6
-audio_features <- c('danceability', 'energy', 'speechiness', 'acousticness', 
-                    'instrumentalness', 'liveness', 'valence')
-the_chainsmokers_filtered <- the_chainsmokers %>%
-  filter(album_name != "So Far So Good (lofi remixes)")
 
-album_comparison <- the_chainsmokers_filtered %>%
-  group_by(album_name) %>%
-  summarise(across(all_of(audio_features), mean, na.rm = TRUE))
+# Select and round key columns from the cleaned data
+selected_clean_data <- clean_data[, c("album_id", "danceability", "energy", "acousticness", "valence", "speechiness")]
+selected_clean_data[, 2:6] <- round(selected_clean_data[, 2:6], 2)
 
-album_comparison_long <- tidyr::pivot_longer(album_comparison, 
-                                             cols = audio_features, 
-                                             names_to = "feature", 
-                                             values_to = "mean_value")
-ggplot(album_comparison_long, aes(x = album_name, y = mean_value, fill = feature)) +
-  geom_bar(stat = "identity", position = "dodge") +
-  labs(x = "Album Name", y = "Mean Value", 
-       title = "Comparison of Audio Features by Album (Excluding Loudness and Tempo)") +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1, size = 8, margin = margin(t = 10))) + 
-  theme_minimal()
+# Display the first six rows of cleaned data
+kbl(selected_clean_data[1:6, ]) %>%
+  kable_styling(full_width = F, bootstrap_options = c("striped", "hover", "condensed"))
 ```
+Data cleaning involved selecting the relevant audio features—danceability, energy, acousticness, valence, and speechiness—from the Spotify API data. Inconsistent album release dates were corrected using lubridate::ymd(), and rows with missing or invalid values were removed.
 
-
-
-
+The cleaned dataset (@tbl-clean) ensures consistency and completeness, as seen by comparing it to the raw data (@tbl-raw).

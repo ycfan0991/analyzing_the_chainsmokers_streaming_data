@@ -1,32 +1,20 @@
 #### Preamble ####
-# Purpose: 
-# Author: 
-# Date: 
-# Contact: 
+# Purpose: Download data about The Chainsmokers from Spotify API and save it as .rds
+# Author: Jerry Xia
+# Date: 10 October 2024
+# Contact: Jerry.xia@mail.utoronto.ca
 # License: MIT
+# Pre-requisites: Spotify API access and credentials, '00-setup.R' executed
+# Any other information needed? 
 
+#### Download Chainsmokers Data ####
+# Use the spotifyr package to download data about The Chainsmokers
+# use Spotify artist ID to retrieve the data
 
-#### Workspace setup ###
+chainsmokers_data <- get_artist_audio_features('the chainsmokers')
 
-# install.packages("devtools")
-# devtools::install_github('charlie86/spotifyr', force = TRUE)
-# install.packages("here")
+# Save the raw data
+saveRDS(chainsmokers_data, file = here("data", "raw_data", "chainsmokers.rds"))
 
-library(spotifyr)
-library(usethis)
-library(here)
-
-edit_r_environ()
-
-#### Download data ####
-
-radiohead <- get_artist_audio_features("radiohead")
-taylor_swift <- get_artist_audio_features("06HL4z0CvFAxyc27GXpf02")
-the_national <- get_artist_audio_features("the national")
-
-
-#### Save data ####
-
-saveRDS(radiohead, "C:/UofT 2022/STA304/TP1/spotify_api/data/00-raw_data/radiohead.rds")
-saveRDS(taylor_swift, "taylor_swift.rds")
-saveRDS(the_national, "C:/UofT 2022/STA304/TP1/spotify_api/data/00-raw_data/the_national.rds")
+# Confirm that the data has been saved
+print("Raw data has been saved to data/raw_data/chainsmokers.rds")

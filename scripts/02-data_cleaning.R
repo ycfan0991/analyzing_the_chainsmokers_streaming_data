@@ -1,37 +1,22 @@
-library(tidyverse)
-library(ggplot2)
-library(dplyr)
+#### Preamble ####
+# Purpose: Clean the downloaded data for The Chainsmokers
+# Author: Jerry Xia
+# Date: 10 October 2024
+# Contact: Jerry.xia@mail.utoronto.ca
+# License: MIT
+# Pre-requisites: 'chainsmokers.rds' saved in 'data/raw_data'
 
-the_chainsmokers <- readRDS(here("data/00-raw_data/the_chainsmokers.rds"))
-the_chainsmokers <- as_tibble(the_chainsmokers)
+#### Load Raw Data ####
+raw_data <- readRDS(here("data", "raw_data", "chainsmokers.rds"))
 
-the_chainsmokers |>
-  mutate(album_release_date = ymd(album_release_date)) |>
-  ggplot(aes(
-    x = album_release_date,
-    y = duration_ms,
-    group = album_release_date
-  )) +
-  geom_boxplot() +
-  geom_jitter(alpha = 0.5, width = 0.3, height = 0) +
-  theme_minimal() +
-  labs(
-    x = "Album release date",
-    y = "Duration of song (ms)"
-  )
+#### Clean Data ####
+cleaned_data <- raw_data %>%
+  mutate(album_release_date = ymd(album_release_date)) %>%
+  select(album_name, album_release_date, danceability, energy, acousticness, valence, speechiness, tempo) %>%
+  filter(!is.na(album_release_date))
 
-audio_features <- c('danceability', 'energy', 'speechiness', 'acousticness', 
-                    'instrumentalness', 'liveness', 'valence')
-album_comparison <- the_chainsmokers %>%
-  group_by(album_name) %>%
-  summarise(across(all_of(audio_features), mean, na.rm = TRUE))
-album_comparison_long <- tidyr::pivot_longer(album_comparison, 
-                                             cols = audio_features, 
-                                             names_to = "feature", 
-                                             values_to = "mean_value")
-ggplot(album_comparison_long, aes(x = album_name, y = mean_value, fill = feature)) +
-  geom_bar(stat = "identity", position = "dodge") +
-  labs(x = "Album Name", y = "Mean Value", 
-       title = "Comparison of Audio Features by Album (Excluding Loudness and Tempo)") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
-  theme_minimal()
+# Save the cleaned data
+saveRDS(cleaned_data, file = here("data", "analysis_data", "clean_chainsmokers_data.rds"))
+
+# Confirm that the data has been saved
+print("Cleaned data saved to 'data/analysis_data/clean_chainsmokers_data.rds'")

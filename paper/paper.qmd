@@ -203,7 +203,7 @@ In future work, expanding the dataset to include these additional dimensions—l
 # Appendix {#sec-app}
 
 ## Raw Data Processing
-The raw data for this analysis was sourced from the Spotify API using the spotifyr [@citeSpotifyr] package. The initial data includes audio features for The Chainsmokers' tracks, such as danceability, energy, acousticness, valence, speechiness, and tempo. The cleaning process focused on ensuring temporal accuracy by filtering and formatting the album release dates.
+The raw data for this analysis was sourced from the Spotify API using the `spotifyr` [@citeSpotifyr] package. The initial data includes audio features for The Chainsmokers' tracks, such as danceability, energy, acousticness, valence, speechiness, and tempo. The cleaning process focused on ensuring temporal accuracy by filtering and formatting the album release dates.
 
 ```{r}
 #| echo: false
